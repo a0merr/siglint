@@ -1,0 +1,9 @@
+title: User Added to Privileged Group
+id: user_added_privileged_group
+level: high
+description: An account was added to sudo/wheel/root, a common privilege-escalation and persistence step.
+logsource: auth
+detection:
+  selection:
+    raw|regex: "(usermod\\s.*-aG\\s.*(sudo|wheel)|to group '?(sudo|wheel|root)'?)"
+  condition: selection

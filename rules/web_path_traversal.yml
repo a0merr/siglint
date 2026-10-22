@@ -1,0 +1,9 @@
+title: Path Traversal Attempt
+id: web_path_traversal
+level: medium
+description: Directory-traversal sequence in a web request, often targeting /etc/passwd.
+logsource: web
+detection:
+  selection:
+    raw|regex: "(\\.\\./){2,}"
+  condition: selection

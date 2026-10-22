@@ -8,6 +8,7 @@ HERE = os.path.dirname(__file__)
 ROOT = os.path.dirname(HERE)
 RULES_DIR = os.path.join(ROOT, "rules")
 SAMPLE_LOG = os.path.join(ROOT, "examples", "auth.log")
+PROCESS_LOG = os.path.join(ROOT, "examples", "process_web.log")
 
 
 def test_operators():
@@ -46,6 +47,17 @@ def test_sample_log_against_all_rules():
     assert "new_user_created" in fired
     assert "accepted_root_login" in fired
     assert "suspicious_download_pipe_shell" in fired
+
+
+def test_process_web_rules_fire():
+    rules = load_rules(RULES_DIR)
+    findings = run_rules(rules, parse_file(PROCESS_LOG))
+    fired = {f.rule.id for f in findings}
+    assert "reverse_shell_devtcp" in fired
+    assert "powershell_encoded_command" in fired  # matches plain + JSON line
+    assert "web_sql_injection" in fired
+    assert "web_path_traversal" in fired
+    assert "user_added_privileged_group" in fired
 
 
 def test_findings_sorted_by_severity():

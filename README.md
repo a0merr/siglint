@@ -94,11 +94,19 @@ flowchart LR
 
 | Rule | Level | What it catches |
 |------|-------|-----------------|
+| `reverse_shell_devtcp` | critical | bash reverse shell via `/dev/tcp` |
+| `suspicious_download_pipe_shell` | critical | `curl … \| sh` dropper pattern |
 | `ssh_brute_force` | high | 5+ failed SSH logins from one IP |
 | `accepted_root_login` | high | successful interactive root login |
-| `suspicious_download_pipe_shell` | critical | `curl … \| sh` dropper pattern |
+| `powershell_encoded_command` | high | base64 `-EncodedCommand` PowerShell |
+| `web_sql_injection` | high | SQLi pattern in a web request |
+| `user_added_privileged_group` | high | account added to sudo/wheel/root |
 | `sudo_auth_failure` | medium | failed sudo / privesc probing |
 | `new_user_created` | medium | new account added (persistence) |
+| `web_path_traversal` | medium | `../../` directory traversal |
+
+Two sample logs ship in `examples/`: `auth.log` (syslog) and `process_web.log`
+(mixed syslog, web access, and JSON lines).
 
 ## GitHub Action
 

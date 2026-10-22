@@ -1,0 +1,9 @@
+title: SQL Injection Attempt
+id: web_sql_injection
+level: high
+description: A SQL injection pattern in a web request (access log).
+logsource: web
+detection:
+  selection:
+    raw|regex: "(?i)(union\\s+select|or\\s+'?1'?\\s*=\\s*'?1)"
+  condition: selection

