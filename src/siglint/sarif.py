@@ -19,7 +19,7 @@ _LEVEL_MAP = {
 TOOL_URI = "https://github.com/a0merr/siglint"
 
 
-def to_sarif(findings: Iterable[Finding], version: str = "0.2.0") -> dict:
+def to_sarif(findings: Iterable[Finding], version: str = "0.3.0") -> dict:
     findings = list(findings)
     rules_index: dict = {}
     results: List[dict] = []
@@ -41,6 +41,8 @@ def to_sarif(findings: Iterable[Finding], version: str = "0.2.0") -> dict:
         text = f"{rule.title} — {finding.count} event(s)"
         if where:
             text += f" from {where}"
+        if finding.span is not None:
+            text += f" within {int(round(finding.span))}s"
 
         results.append(
             {

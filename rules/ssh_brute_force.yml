@@ -1,7 +1,7 @@
 title: SSH Brute Force
 id: ssh_brute_force
 level: high
-description: Many failed SSH password attempts from a single source IP.
+description: 5+ failed SSH password attempts from one source IP within a minute.
 logsource: auth
 detection:
   selection:
@@ -9,4 +9,5 @@ detection:
   threshold:
     count: 5
     group_by: src_ip
+  timeframe: 1m
   condition: selection

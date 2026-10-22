@@ -159,11 +159,12 @@ def rule_matches(rule: Rule, event: dict) -> bool:
 
 
 class Finding:
-    def __init__(self, rule: Rule, event: dict, count: int = 1, group=None):
+    def __init__(self, rule: Rule, event: dict, count: int = 1, group=None, span=None):
         self.rule = rule
         self.event = event  # representative event (last match for thresholds)
         self.count = count
         self.group = group
+        self.span = span  # seconds between first and last event, for timeframe rules
 
     def __repr__(self) -> str:
         return f"<Finding {self.rule.id} count={self.count} group={self.group}>"
@@ -187,9 +188,37 @@ def run_rule(rule: Rule, events: List[dict]) -> List[Finding]:
 
     findings = []
     for key, bucket in buckets.items():
-        if len(bucket) >= count_needed:
+        if rule.timeframe is not None:
+            finding = _densest_window(rule, bucket, count_needed, key)
+            if finding:
+                findings.append(finding)
+        elif len(bucket) >= count_needed:
             findings.append(Finding(rule, bucket[-1], count=len(bucket), group=key))
     return findings
+
+
+def _densest_window(rule: Rule, bucket: List[dict], count_needed: int, group):
+    """Slide a `timeframe`-wide window over the bucket; report its busiest position.
+
+    Events without a readable time cannot be placed in a window and are skipped.
+    """
+    timed = sorted(
+        (ev for ev in bucket if ev.get("_ts") is not None),
+        key=lambda ev: (ev["_ts"], ev.get("_line", 0)),
+    )
+    best = None  # (count, start index, end index)
+    start = 0
+    for end, event in enumerate(timed):
+        while event["_ts"] - timed[start]["_ts"] > rule.timeframe:
+            start += 1
+        size = end - start + 1
+        if best is None or size > best[0]:
+            best = (size, start, end)
+    if best is None or best[0] < count_needed:
+        return None
+    size, first, last = best
+    span = timed[last]["_ts"] - timed[first]["_ts"]
+    return Finding(rule, timed[last], count=size, group=group, span=span)
 
 
 def run_rules(rules: Iterable[Rule], events: Iterable[dict]) -> List[Finding]:

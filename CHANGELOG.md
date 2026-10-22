@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0
+
+- **`timeframe`:** threshold rules can require their matches to fall inside a
+  sliding window (`30s`, `5m`, `1h`, `1d`). Findings report the densest window
+  and its span — in the table, JSON (`span_seconds`), and SARIF message.
+- **Event times:** parsed from syslog, ISO-8601 JSON keys, PowerShell
+  `/Date(ms)/`, epoch seconds/ms, and access-log brackets. Year-less syslog
+  borrows the file's year and survives a December → January rollover.
+- `ssh_brute_force` now means 5 failures within 1m; `windows_failed_logon`
+  3 within 5m.
+
 ## 0.2.0
 
 Real Sigma detection syntax — 3,136 of 3,161 SigmaHQ rules now load.

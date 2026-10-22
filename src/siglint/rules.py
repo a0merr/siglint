@@ -39,6 +39,18 @@ from .condition import parse_condition
 # Keys under `detection` that are not searches.
 _RESERVED = {"condition", "threshold", "timeframe"}
 
+_TIMEFRAME_RE = re.compile(r"^\s*(\d+)\s*([smhd])\s*$", re.IGNORECASE)
+_UNIT_SECONDS = {"s": 1, "m": 60, "h": 3600, "d": 86400}
+
+
+def parse_timeframe(value) -> float:
+    """Sigma timeframe ("30s", "5m", "1h", "2d") -> seconds."""
+    m = _TIMEFRAME_RE.match(str(value))
+    if not m or int(m.group(1)) <= 0:
+        raise ValueError(f"bad timeframe {value!r} (use e.g. 30s, 5m, 1h, 1d)")
+    return int(m.group(1)) * _UNIT_SECONDS[m.group(2).lower()]
+
+
 MODIFIERS = {
     "equals", "contains", "startswith", "endswith",
     "re", "regex", "gt", "gte", "lt", "lte", "cidr",
@@ -96,6 +108,14 @@ class Rule:
             _check_search(self.id, name, body)
         self.selection = self.searches.get("selection", {})
         self.threshold = detection.get("threshold")
+        self.timeframe: Optional[float] = None
+        if detection.get("timeframe") is not None:
+            if not self.threshold:
+                raise ValueError(f"rule {self.id!r}: timeframe needs a threshold to count within")
+            try:
+                self.timeframe = parse_timeframe(detection["timeframe"])
+            except ValueError as exc:
+                raise ValueError(f"rule {self.id!r}: {exc}") from None
 
         condition = detection.get("condition")
         if condition is None:

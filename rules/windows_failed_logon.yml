@@ -9,4 +9,5 @@ detection:
   threshold:
     count: 3
     group_by: event_id
+  timeframe: 5m
   condition: selection

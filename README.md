@@ -21,7 +21,7 @@ LEVEL  RULE                            COUNT  WHERE / LINE
 CRIT   suspicious_download_pipe_shell      1  line 10
 CRIT   uid0_account_created                1  line 9
 HIGH   accepted_root_login                 1  line 7
-HIGH   ssh_brute_force                     6  203.0.113.9
+HIGH   ssh_brute_force                     6  203.0.113.9  (within 10s)
 MED    new_user_created                    1  line 9
 MED    sudo_auth_failure                   1  line 8
 ```
@@ -96,18 +96,28 @@ wildcards, a list means *any*, and `null` means the field is missing or empty.
 | `gt` `gte` `lt` `lte` | numeric comparison |
 | `cased` | exact-case string match |
 
-**Thresholds** — siglint's stand-in for Sigma's correlation rules. Fire only
-after `count` matches, grouped by a field:
+**Thresholds and timeframes** — siglint's stand-in for Sigma's correlation
+rules. Fire only after `count` matches per `group_by` value; add `timeframe`
+and they must land inside a sliding window of that width:
 
 ```yaml
   threshold:
     count: 5
     group_by: src_ip
+  timeframe: 1m        # 30s, 5m, 1h, 1d
 ```
+
+Five failures in ten seconds fires; the same five spread across an afternoon
+does not. Findings report the densest window and how long it spanned. Times are
+read from syslog stamps, ISO-8601 JSON keys (`@timestamp`, `TimeCreated`, …),
+PowerShell's `/Date(ms)/`, epoch numbers, and access-log brackets; year-less
+syslog lines borrow the year of the file's first fully dated event and handle
+a December → January rollover. Events with no readable time are left out of
+windowed counts rather than guessed at.
 
 The parser enriches each event with `src_ip` and `user` pulled from the
 message, so rules can match those fields across syslog and JSON logs alike.
-Not supported (yet): `base64offset`, `fieldref`, pipe aggregations, `timeframe`.
+Not supported (yet): `base64offset`, `fieldref`, pipe aggregations.
 
 ## How it works
 
@@ -137,7 +147,7 @@ flowchart LR
 | `suspicious_download_pipe_shell` | critical | `curl … \| sh` dropper pattern |
 | `uid0_account_created` | critical | second root-equivalent (UID 0) account |
 | `log_tampering` | high | `history -c`, `unset HISTFILE`, log wiping |
-| `ssh_brute_force` | high | 5+ failed SSH logins from one IP |
+| `ssh_brute_force` | high | 5+ failed SSH logins from one IP within 1m |
 | `accepted_root_login` | high | successful interactive root login |
 | `powershell_encoded_command` | high | base64 `-EncodedCommand` PowerShell |
 | `web_sql_injection` | high | SQLi pattern in a web request |
@@ -147,7 +157,7 @@ flowchart LR
 | `sudo_auth_failure` | medium | failed sudo / privesc probing (CI accounts filtered) |
 | `new_user_created` | medium | new account added (persistence) |
 | `web_path_traversal` | medium | `../../` directory traversal |
-| `windows_failed_logon` | medium | 3+ Windows failed logons (4625) |
+| `windows_failed_logon` | medium | 3+ Windows failed logons (4625) within 5m |
 
 Three sample logs ship in `examples/`: `auth.log` (syslog), `process_web.log`
 (mixed syslog / web access / JSON), and `windows_events.json` (Windows event

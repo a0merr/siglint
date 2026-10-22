@@ -26,6 +26,15 @@ _LEVEL_TAG = {
 }
 
 
+def _duration(seconds: float) -> str:
+    seconds = int(round(seconds))
+    if seconds < 120:
+        return f"{seconds}s"
+    if seconds < 7200:
+        return f"{seconds // 60}m"
+    return f"{seconds // 3600}h"
+
+
 def _print_table(findings: List[Finding], logfiles: List[str]) -> None:
     label = logfiles[0] if len(logfiles) == 1 else f"{len(logfiles)} files"
     if not findings:
@@ -38,6 +47,8 @@ def _print_table(findings: List[Finding], logfiles: List[str]) -> None:
     for f in findings:
         if f.group not in (None, "*"):
             where = str(f.group)
+            if f.span is not None:
+                where += f"  (within {_duration(f.span)})"
         elif len(logfiles) > 1:
             where = f"{f.event.get('_source')}:{f.event.get('_line', '?')}"
         else:
@@ -86,6 +97,7 @@ def _scan(args: argparse.Namespace) -> int:
                         "group": f.group,
                         "file": f.event.get("_source"),
                         "line": f.event.get("_line"),
+                        "span_seconds": f.span,
                     }
                     for f in findings
                 ],
