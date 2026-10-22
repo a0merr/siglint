@@ -10,9 +10,7 @@ Built by a [Sigma](https://github.com/SigmaHQ/sigma) contributor — same detect
 
 ## Demo (30 seconds)
 
-<!-- Generate the GIF with `vhs assets/demo.tape` (see assets/demo.tape),
-     then uncomment the line below to show it here. -->
-<!-- ![siglint demo](assets/demo.gif) -->
+![siglint demo: a Sigma rule with a filter, `siglint validate`, and a two-file scan that fails CI on high-severity findings](assets/demo.gif)
 
 ```console
 $ siglint scan examples/auth.log -r rules
