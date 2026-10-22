@@ -105,12 +105,18 @@ flowchart LR
 | `powershell_encoded_command` | high | base64 `-EncodedCommand` PowerShell |
 | `web_sql_injection` | high | SQLi pattern in a web request |
 | `user_added_privileged_group` | high | account added to sudo/wheel/root |
+| `windows_new_user` | high | Windows account created (Event ID 4720) |
+| `windows_new_service` | high | Windows service installed (7045) |
 | `sudo_auth_failure` | medium | failed sudo / privesc probing |
 | `new_user_created` | medium | new account added (persistence) |
 | `web_path_traversal` | medium | `../../` directory traversal |
+| `windows_failed_logon` | medium | 3+ Windows failed logons (4625) |
 
-Two sample logs ship in `examples/`: `auth.log` (syslog) and `process_web.log`
-(mixed syslog, web access, and JSON lines).
+Three sample logs ship in `examples/`: `auth.log` (syslog), `process_web.log`
+(mixed syslog / web access / JSON), and `windows_events.json` (Windows event
+JSON, as from `Get-WinEvent | ConvertTo-Json`).
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) to add your own rules.
 
 ## GitHub Action
 

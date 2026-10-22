@@ -24,7 +24,22 @@ _USER_RE = re.compile(r"(?:invalid user |user[= ]|for )(?P<user>[\w.$-]+)")
 
 
 def _enrich(event: dict) -> dict:
-    """Pull src_ip / user out of the message if not already present."""
+    """Normalize common fields and pull src_ip / user out of the message.
+
+    Also maps Windows event JSON (e.g. `Get-WinEvent | ConvertTo-Json` or an
+    evtx export) onto the common keys `message`, `event_id`, and `provider`.
+    """
+    # Windows event JSON uses PascalCase keys.
+    if "message" not in event and "Message" in event:
+        event["message"] = event["Message"]
+    if "event_id" not in event:
+        if "Id" in event:
+            event["event_id"] = event["Id"]
+        elif "EventID" in event:
+            event["event_id"] = event["EventID"]
+    if "provider" not in event and "ProviderName" in event:
+        event["provider"] = event["ProviderName"]
+
     message = str(event.get("message", event.get("raw", "")))
     if "src_ip" not in event:
         m = _IP_RE.search(message)

@@ -9,6 +9,7 @@ ROOT = os.path.dirname(HERE)
 RULES_DIR = os.path.join(ROOT, "rules")
 SAMPLE_LOG = os.path.join(ROOT, "examples", "auth.log")
 PROCESS_LOG = os.path.join(ROOT, "examples", "process_web.log")
+WINDOWS_LOG = os.path.join(ROOT, "examples", "windows_events.json")
 
 
 def test_operators():
@@ -58,6 +59,16 @@ def test_process_web_rules_fire():
     assert "web_sql_injection" in fired
     assert "web_path_traversal" in fired
     assert "user_added_privileged_group" in fired
+
+
+def test_windows_event_rules_fire():
+    rules = load_rules(RULES_DIR)
+    findings = run_rules(rules, parse_file(WINDOWS_LOG))
+    by_id = {f.rule.id: f for f in findings}
+    assert "windows_failed_logon" in by_id
+    assert by_id["windows_failed_logon"].count == 3  # three 4625s, not the 4624
+    assert "windows_new_user" in by_id
+    assert "windows_new_service" in by_id
 
 
 def test_findings_sorted_by_severity():

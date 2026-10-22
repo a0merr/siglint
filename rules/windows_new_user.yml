@@ -1,0 +1,9 @@
+title: Windows User Account Created (4720)
+id: windows_new_user
+level: high
+description: A new Windows user account was created (Event ID 4720), a common persistence step.
+logsource: windows-security
+detection:
+  selection:
+    event_id|equals: 4720
+  condition: selection

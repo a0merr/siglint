@@ -1,0 +1,12 @@
+title: Windows Failed Logons (4625)
+id: windows_failed_logon
+level: medium
+description: Repeated Windows failed-logon events (Event ID 4625), possible password guessing.
+logsource: windows-security
+detection:
+  selection:
+    event_id|equals: 4625
+  threshold:
+    count: 3
+    group_by: event_id
+  condition: selection

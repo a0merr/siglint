@@ -1,0 +1,9 @@
+title: Windows Service Installed (7045)
+id: windows_new_service
+level: high
+description: A new Windows service was installed (Event ID 7045), often used for persistence or lateral movement.
+logsource: windows-system
+detection:
+  selection:
+    event_id|equals: 7045
+  condition: selection
