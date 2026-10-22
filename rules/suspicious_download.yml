@@ -1,0 +1,9 @@
+title: Suspicious Remote Download Piped to Shell
+id: suspicious_download_pipe_shell
+level: critical
+description: A curl/wget download piped straight into a shell, a common dropper pattern.
+logsource: process
+detection:
+  selection:
+    raw|regex: "(curl|wget)\\s+[^|]*\\|\\s*(ba)?sh"
+  condition: selection

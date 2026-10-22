@@ -1,0 +1,10 @@
+title: Accepted Root Login
+id: accepted_root_login
+level: high
+description: A successful interactive login as root over SSH.
+logsource: auth
+detection:
+  selection:
+    message|contains: "Accepted"
+    user|equals: "root"
+  condition: selection

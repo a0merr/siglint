@@ -1,0 +1,10 @@
+title: Failed sudo Attempt
+id: sudo_auth_failure
+level: medium
+description: A sudo authentication failure, possible privilege-escalation probing.
+logsource: auth
+detection:
+  selection:
+    process|startswith: "sudo"
+    message|contains: "authentication failure"
+  condition: selection

@@ -1,0 +1,9 @@
+title: New User Account Created
+id: new_user_created
+level: medium
+description: A new user account was added, which may indicate persistence.
+logsource: auth
+detection:
+  selection:
+    message|contains: "new user"
+  condition: selection

