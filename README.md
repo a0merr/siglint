@@ -10,6 +10,10 @@ Built by a [Sigma](https://github.com/SigmaHQ/sigma) contributor — same detect
 
 ## Demo (30 seconds)
 
+<!-- Generate the GIF with `vhs assets/demo.tape` (see assets/demo.tape),
+     then uncomment the line below to show it here. -->
+<!-- ![siglint demo](assets/demo.gif) -->
+
 ```console
 $ siglint scan examples/auth.log -r rules
 5 finding(s) in examples/auth.log:
