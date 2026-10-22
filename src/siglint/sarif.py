@@ -19,7 +19,7 @@ _LEVEL_MAP = {
 TOOL_URI = "https://github.com/a0merr/siglint"
 
 
-def to_sarif(findings: Iterable[Finding], version: str = "0.1.0") -> dict:
+def to_sarif(findings: Iterable[Finding], version: str = "0.2.0") -> dict:
     findings = list(findings)
     rules_index: dict = {}
     results: List[dict] = []

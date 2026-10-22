@@ -7,4 +7,9 @@ detection:
   selection:
     process|startswith: "sudo"
     message|contains: "authentication failure"
-  condition: selection
+  filter_service_accounts:
+    user:
+      - jenkins
+      - gitlab-runner
+      - ansible
+  condition: selection and not filter_service_accounts

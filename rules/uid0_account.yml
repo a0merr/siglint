@@ -1,0 +1,12 @@
+title: Second UID 0 Account Created
+id: uid0_account_created
+level: critical
+description: A new account was created or modified with UID 0 — a root-equivalent backdoor (MITRE T1136.001).
+logsource: auth
+detection:
+  selection_useradd:
+    process: useradd
+    message|contains: "UID=0"
+  selection_usermod:
+    raw|re: 'usermod\s.*-o\s.*-u\s*0\b'
+  condition: 1 of selection_*

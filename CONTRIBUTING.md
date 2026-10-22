@@ -25,11 +25,13 @@ description: One line on what this catches and why it matters.
 logsource: auth            # free-form hint (auth, web, process, windows-security…)
 detection:
   selection:
-    <field>|<operator>: <value or [list of values]>
+    <field>|<modifier>: <value or [list of values]>
+  filter:                  # optional: any number of named searches
+    <field>: <value>
   threshold:               # optional
     count: 5
     group_by: src_ip
-  condition: selection
+  condition: selection and not filter
 ```
 
 ### Fields
@@ -40,16 +42,21 @@ directly. Windows event JSON is normalized to `event_id`, `provider`, `message`.
 
 Match on `raw` when you're not sure a field exists — it's always present.
 
-### Operators (after a `|`)
+### Searches, conditions, modifiers
 
-| Operator | Matches when the field… |
-|----------|-------------------------|
-| `equals` (default) | equals the value |
-| `contains` | contains the value as a substring |
-| `startswith` / `endswith` | starts / ends with the value |
-| `regex` | matches the Python regex |
+siglint follows Sigma's detection syntax — the README's
+[Writing a rule](README.md#writing-a-rule) section has the full modifier table.
+In short:
 
-A list of values means **OR**. Multiple fields in a `selection` mean **AND**.
+- Multiple fields in a search mean **AND**; a list of values means **OR**
+  (add `|all` to require every value).
+- Matching is case-insensitive; `*` / `?` are wildcards.
+- `condition` combines searches with `and`, `or`, `not`, parentheses and
+  `1 of selection_*` / `all of them`.
+
+Run `siglint validate rules` before opening a PR — it catches unknown
+modifiers, bad regexes, conditions that reference missing searches, and
+duplicate ids.
 
 ### Thresholds
 
@@ -67,7 +74,7 @@ be merged.
 
 - One rule (or one focused change) per PR.
 - Keep `id` values stable — they're the SARIF `ruleId` downstream tools key on.
-- CI must be green: `pytest` on 3.10–3.12 and the sample-log scan.
+- CI must be green: `pytest` on 3.10–3.13, `siglint validate rules`, and the sample-log scan.
 
 ## Reporting false positives
 

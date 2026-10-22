@@ -1,0 +1,13 @@
+title: Shell History or Log Tampering
+id: log_tampering
+level: high
+description: Attacker clearing shell history or wiping logs to cover tracks (MITRE T1070).
+logsource: process
+detection:
+  keywords:
+    - "history -c"
+    - "unset HISTFILE"
+    - "HISTFILE=/dev/null"
+    - "rm -rf /var/log*"
+    - "shred *log*"
+  condition: keywords

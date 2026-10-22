@@ -48,6 +48,7 @@ def test_sample_log_against_all_rules():
     assert "new_user_created" in fired
     assert "accepted_root_login" in fired
     assert "suspicious_download_pipe_shell" in fired
+    assert "uid0_account_created" in fired  # useradd ... UID=0
 
 
 def test_process_web_rules_fire():
@@ -59,6 +60,7 @@ def test_process_web_rules_fire():
     assert "web_sql_injection" in fired
     assert "web_path_traversal" in fired
     assert "user_added_privileged_group" in fired
+    assert "log_tampering" in fired  # keyword search
 
 
 def test_windows_event_rules_fire():

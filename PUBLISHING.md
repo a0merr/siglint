@@ -25,8 +25,8 @@ created, pasted, or stored — PyPI trusts a specific GitHub workflow directly.
 1. Bump `version` in `pyproject.toml` (and tag to match).
 2. Tag and push:
    ```bash
-   git tag v0.1.0
-   git push origin v0.1.0
+   git tag v0.2.0
+   git push origin v0.2.0
    ```
 3. GitHub → Releases → **Draft a new release** → pick the tag → Publish.
 

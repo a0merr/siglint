@@ -1,4 +1,8 @@
-"""Command-line entry point: `siglint scan <logfile> -r <rules>`."""
+"""Command-line entry points.
+
+    siglint scan <logfile>... -r <rules>
+    siglint validate <rules>
+"""
 
 from __future__ import annotations
 
@@ -10,7 +14,7 @@ from typing import List, Optional
 from . import __version__
 from .engine import Finding, run_rules
 from .parsers import parse_file
-from .rules import SEVERITY_ORDER, load_rules
+from .rules import SEVERITY_ORDER, load_rules, validate_rules
 from .sarif import to_sarif
 
 _LEVEL_TAG = {
@@ -22,28 +26,46 @@ _LEVEL_TAG = {
 }
 
 
-def _print_table(findings: List[Finding], logfile: str) -> None:
+def _print_table(findings: List[Finding], logfiles: List[str]) -> None:
+    label = logfiles[0] if len(logfiles) == 1 else f"{len(logfiles)} files"
     if not findings:
-        print(f"No findings in {logfile}.")
+        print(f"No findings in {label}.")
         return
-    print(f"{len(findings)} finding(s) in {logfile}:\n")
-    print(f"{'LEVEL':5}  {'RULE':24}  {'COUNT':>5}  WHERE / LINE")
-    print("-" * 70)
+    print(f"{len(findings)} finding(s) in {label}:\n")
+    width = max(len("RULE"), *(len(f.rule.id) for f in findings))
+    print(f"{'LEVEL':5}  {'RULE':{width}}  {'COUNT':>5}  WHERE / LINE")
+    print("-" * (width + 40))
     for f in findings:
-        where = f.group if f.group not in (None, "*") else f"line {f.event.get('_line', '?')}"
+        if f.group not in (None, "*"):
+            where = str(f.group)
+        elif len(logfiles) > 1:
+            where = f"{f.event.get('_source')}:{f.event.get('_line', '?')}"
+        else:
+            where = f"line {f.event.get('_line', '?')}"
         tag = _LEVEL_TAG.get(f.rule.level, "MED ")
-        print(f"{tag:5}  {f.rule.id[:24]:24}  {f.count:>5}  {where}")
+        print(f"{tag:5}  {f.rule.id:{width}}  {f.count:>5}  {where}")
 
 
 def _scan(args: argparse.Namespace) -> int:
-    rules = load_rules(args.rules)
+    try:
+        rules = load_rules(args.rules)
+    except (OSError, ValueError) as exc:
+        print(f"error loading rules: {exc}", file=sys.stderr)
+        print(f"run `siglint validate {args.rules}` to see every problem", file=sys.stderr)
+        return 2
     if not rules:
         print(f"No rules found at {args.rules!r}.", file=sys.stderr)
         return 2
 
-    events = list(parse_file(args.logfile, args.format))
-    for event in events:
-        event["_source"] = args.logfile
+    events = []
+    for logfile in args.logfile:
+        try:
+            for event in parse_file(logfile, args.format):
+                event["_source"] = logfile
+                events.append(event)
+        except OSError as exc:
+            print(f"error reading {logfile}: {exc.strerror}", file=sys.stderr)
+            return 2
 
     findings = run_rules(rules, events)
 
@@ -62,6 +84,7 @@ def _scan(args: argparse.Namespace) -> int:
                         "level": f.rule.level,
                         "count": f.count,
                         "group": f.group,
+                        "file": f.event.get("_source"),
                         "line": f.event.get("_line"),
                     }
                     for f in findings
@@ -79,6 +102,14 @@ def _scan(args: argparse.Namespace) -> int:
     return 0
 
 
+def _validate(args: argparse.Namespace) -> int:
+    rules, errors = validate_rules(args.rules)
+    for path, message in errors:
+        print(f"FAIL  {path}: {message}")
+    print(f"{len(rules)} rule(s) OK, {len(errors)} error(s).")
+    return 1 if errors or not rules else 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="siglint",
@@ -88,7 +119,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     scan = sub.add_parser("scan", help="scan a log file against rules")
-    scan.add_argument("logfile", help="path to the log file")
+    scan.add_argument("logfile", nargs="+", help="one or more log files")
     scan.add_argument(
         "-r", "--rules", default="rules", help="rule file or directory (default: rules)"
     )
@@ -106,6 +137,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="exit 1 if a finding at or above this level is present",
     )
     scan.set_defaults(func=_scan)
+
+    validate = sub.add_parser("validate", help="check rules for errors without scanning")
+    validate.add_argument("rules", nargs="?", default="rules", help="rule file or directory")
+    validate.set_defaults(func=_validate)
     return parser
 
 
