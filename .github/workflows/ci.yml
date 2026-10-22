@@ -40,11 +40,7 @@ jobs:
         with:
           name: siglint-sarif
           path: results.sarif
-      # Security-tab upload needs GitHub Advanced Security, which is free on
-      # public repos but absent on private ones — keep it non-fatal so CI stays
-      # green until the repo is public.
       - name: Upload SARIF to the Security tab
-        continue-on-error: true
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif
